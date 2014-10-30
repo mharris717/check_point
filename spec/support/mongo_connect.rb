@@ -1,1 +1,1 @@
-MongoidGemConfig.connect! :test
+# MongoidGemConfig.connect! :test

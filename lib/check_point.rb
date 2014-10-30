@@ -1,9 +1,7 @@
-
-
 require 'mharris_ext'
 require 'andand'
-require 'mongoid'
-require 'mongoid_gem_config'
+# require 'mongoid'
+# require 'mongoid_gem_config'
 
 module CheckPoint
   class << self
@@ -18,6 +16,6 @@ module CheckPoint
   end
 end
 
-MongoidGemConfig.register_gems CheckPoint
+# MongoidGemConfig.register_gems CheckPoint
 
 CheckPoint.load!
