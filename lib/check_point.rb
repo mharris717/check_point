@@ -6,7 +6,7 @@ require 'andand'
 module CheckPoint
   class << self
     def load!
-      %w(main).each do |f|
+      %w(track).each do |f|
         load File.dirname(__FILE__) + "/check_point/#{f}.rb"
       end
     end
