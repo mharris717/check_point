@@ -1,0 +1,1 @@
+MongoidGemConfig.connect! :test

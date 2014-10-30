@@ -1,0 +1,22 @@
+
+
+development:
+  sessions:
+    check_point:
+      database: check_point_dev
+      hosts:
+        - localhost:27017
+
+test:
+  sessions:
+    check_point:
+      database: check_point_test
+      hosts:
+        - localhost:27017
+
+production:
+  sessions:
+    check_point:
+      database: check_point_prod
+      hosts:
+        - localhost:27017

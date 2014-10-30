@@ -1,0 +1,5 @@
+jewel_name = 'check_point'
+c.command "jeweler #{jewel_name} --summary #{jewel_name} --description #{jewel_name} --rspec", path: "#{jewel_name}"
+c.overlay "."
+# c.command "bundle install"
+c.command "bundle config --global local.#{jewel_name} /code/orig/#{jewel_name}"
