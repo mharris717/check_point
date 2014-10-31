@@ -7,32 +7,31 @@ def make_temp_dir
   res
 end
 
+def git_cmd(cmd, ops)
+  raise "bad" unless ops[:working_dir] && ops[:repo]
+  ec "git --git-dir=#{ops[:repo]} --work-tree=#{root} #{cmd}", silent: true
+end
+
 class MakeDir
   include FromHash
 
   def initialize(ops={})
     from_hash(ops)
-    ec "git --git-dir=#{repo} --work-tree=#{root} init", silent: true
+    git_cmd :init, repo: repo, working_dir: root
   end
 
   fattr(:root) do
     make_temp_dir
-    #ec "git --git-dir=#{repo} --work-tree=#{res} init", silent: true
-    #res
   end
 
   fattr(:repo) do
-    #res = make_temp_dir
-    #res = "#{res}/.git"
-    #ec "mkdir #{res}", silent: true
-    #res
     res = "#{root}/.gitcp"
     ec "mkdir #{res}", silent: true
     res
   end
 
   def git(cmd)
-    ec "git --git-dir=#{repo} --work-tree=#{root} #{cmd}", silent: true
+    git_cmd cmd, repo: repo, working_dir: root
   end
 
   def file(path,body,ops={})
@@ -49,49 +48,67 @@ class MakeDir
   end
 end
 
+shared_context "make dir" do
+  let(:d) do
+    MakeDir.new
+  end
+
+  def assert_status(ops)
+    all = [:changed, :deleted, :added, :untracked]
+    other = all - ops.keys
+    ops.each do |k,v|
+      if k == :other
+        other.each do |other_key|
+          d.git_obj.status.send(other_key).size.should == v
+        end
+      else
+        d.git_obj.status.send(k).size.should == v
+      end
+    end
+  end
+
+  def read_file(f)
+    File.read("#{d.root}/#{f}")
+  end
+
+  def assert_file(f,body)
+    read_file(f).should == body
+  end
+
+  def files
+    Dir["#{d.root}/*"]
+  end
+
+  let(:track) do
+    CheckPoint::Track.new(working_dir: d.root)
+  end
+
+end
+
 describe "CheckPoint" do
-  it 'smoke' do
-    2.should == 2
-    CheckPoint.should be
+  include_context "make dir"
+
+  before do
+    d.file "a.txt","abc"
+    assert_file "a.txt", "abc"
+    assert_status changed: 0, deleted: 0
   end
 
   it 'make dir' do
-    d = MakeDir.new
-    d.file "a.txt","abc"
-    File.read("#{d.root}/a.txt").should == "abc"
-    d.git_obj.status.changed.size.should == 0
-    d.git_obj.status.deleted.size.should == 0
-
     d.file "a.txt","xyz", commit: false
-    d.git_obj.status.changed.size.should == 1
-    # require 'pp'
-    # pp d.git_obj.status
-    # puts d.git :status
-
-
-    # res = d.git :status
-    # res.should == "zzz"
-
-    # ec "cd #{d.repo} && ls"
+    assert_status changed: 1, other: 0
   end
 
   it 'checkout smoke' do
-    d = MakeDir.new
-    d.file "a.txt","abc"
-
     d.git "checkout -b m2"
     d.file "b.txt","def"
-
-    Dir["#{d.root}/*"].size.should == 2
+    files.size.should == 2
 
     d.git "checkout master"
-    Dir["#{d.root}/*"].size.should == 1
+    files.size.should == 1
   end
 
   it 'thing' do
-    d = MakeDir.new
-    d.file "a.txt","abc"
-
     d.git "checkout -b m2"
     d.file "b.txt","def"
 
@@ -99,35 +116,21 @@ describe "CheckPoint" do
     git = Git.open(tmp, repository: d.repo, index: "#{d.repo}/index")
     git.reset_hard
     git.checkout(:master)
-    #ec "git --git-dir=#{d.repo} --work-tree=#{tmp} reset --hard"
-    # ec "git --git-dir=#{d.repo} --work-tree=#{tmp} checkout master"
     
-
     Dir["#{d.root}/*"].size.should == 2
     Dir["#{tmp}/*"].size.should == 1
   end
 
   it 'track' do
-    d = MakeDir.new
-    d.file "a.txt","abc"
-
-    track = CheckPoint::Track.new(working_dir: d.root, repo_dir: d.repo)
-    File.create "#{d.root}/b.txt", "def"
+    d.file "b.txt", "def", commit: false
     track.commit!
   end
 
   it 'track2' do
-    dir = make_temp_dir
-    ec "cd #{dir} && git init"
-    File.create "#{dir}/a.txt","abc"
-    ec "cd #{dir} && git add a.txt && git commit -m CS"
-
-    track = CheckPoint::Track.new(working_dir: dir)
     track.commit!
+    d.file "b.txt", "def", commit: false
 
-    File.create "#{dir}/b.txt", "def"
     track.commit!
-
     track.commit!
 
     # ec "git --work-tree=#{track.working_dir} --git-dir=#{track.repo_dir} log"
