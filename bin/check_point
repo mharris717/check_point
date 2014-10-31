@@ -12,7 +12,8 @@ command = ARGV[0] || 'commit'
 if command == 'commit'
   track.commit!
 elsif command == 'log'
-  ec "git --work-tree=#{working_dir} --git-dir=#{working_dir}/.gitcp log"
+  # ec "git --work-tree=#{working_dir} --git-dir=#{working_dir}/.gitcp log"
+  puts track.pretty_log
 elsif command == "loop"
   loop do
     puts "Checkpoint #{Time.now}"

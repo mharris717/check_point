@@ -42,5 +42,11 @@ module CheckPoint
       repo.add(all: true)
       repo.commit_all("CS")
     end
+
+    def pretty_log
+      repo.log.map do |commit|
+        "commit #{commit.sha}\n#{commit.message}"
+      end.join("\n")
+    end
   end
 end

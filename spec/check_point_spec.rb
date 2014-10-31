@@ -161,7 +161,7 @@ describe "CheckPoint" do
     bin = "#{CheckPoint.root}/bin/check_point"
     res = nil
     Dir.chdir(d.root) do
-      res = ec "#{bin} #{cmd}"
+      res = ec "#{bin} #{cmd}", silent: true
     end
     res
   end
@@ -185,6 +185,6 @@ describe "CheckPoint" do
 
     sha = track.repo.gcommit('master').sha
     log = exec_bin :log
-    (log =~ /commit #{sha}/).should be
+    log.should match(/commit #{sha}/)
   end
 end
