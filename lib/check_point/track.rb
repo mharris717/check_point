@@ -24,7 +24,6 @@ module CheckPoint
 
     def changes?
       if !has_commits?
-        puts "no commits"
         return true 
       end
 

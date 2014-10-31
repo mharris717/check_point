@@ -27,6 +27,7 @@ guard 'rspec', :cli => "--drb --drb-port 4954" do
   #watch(%r{^spec/support/(.+)\.rb$})   { "spec" }
   watch('spec/spec_helper.rb')  { "spec" }
   watch(%r{^app/(.+)\.rb$})   { "spec" }
+  watch(%r{^bin/(.+)$})   { "spec" }
 end
 
 

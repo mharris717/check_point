@@ -106,6 +106,7 @@ DEPENDENCIES
   guard-spork
   jeweler (~> 1.8.7)
   mharris_ext
+  rake
   rb-fsevent (~> 0.9)
   rdoc (~> 3.12)
   rspec (~> 2.8.0)
