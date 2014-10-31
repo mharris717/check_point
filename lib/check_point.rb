@@ -1,5 +1,6 @@
 require 'mharris_ext'
 require 'andand'
+require 'git'
 # require 'mongoid'
 # require 'mongoid_gem_config'
 

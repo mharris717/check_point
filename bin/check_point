@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+root = File.expand_path(File.dirname(__FILE__) + "/..")
+load "#{root}/lib/check_point.rb"
+
+working_dir = File.expand_path(".")
+
+track = CheckPoint::Track.new(working_dir: working_dir)
+
+command = ARGV[0] || 'commit'
+
+if command == 'commit'
+  track.commit!
+elsif command == 'log'
+  ec "git --work-tree=#{working_dir} --git-dir=#{working_dir}/.gitcp log"
+elsif command == "loop"
+  loop do
+    puts "Checkpoint #{Time.now}"
+    track.commit!
+    sleep 60
+  end
+end

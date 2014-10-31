@@ -1,5 +1,3 @@
-require 'git'
-
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 def make_temp_dir
@@ -128,6 +126,8 @@ describe "CheckPoint" do
     track.commit!
 
     File.create "#{dir}/b.txt", "def"
+    track.commit!
+
     track.commit!
 
     # ec "git --work-tree=#{track.working_dir} --git-dir=#{track.repo_dir} log"

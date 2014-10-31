@@ -14,12 +14,28 @@ module CheckPoint
       ec "git --git-dir=#{repo_dir} --work-tree=#{working_dir} init", silent: true
     end
 
+    def has_commits?
+      repo.log.size
+      true
+    rescue => exp
+      return false if exp.message =~ /bad default revision/
+      return true
+    end
+
+    def changes?
+      return true if !has_commits?
+      s = repo.status
+      s.changed.size > 0 || s.deleted.size > 0 || s.added.size > 0 || s.untracked.size > 0
+    end
+
     fattr(:repo) do
+      ensure_repo_exists!
       Git.open(working_dir, repository: repo_dir, index: "#{repo_dir}/index")
     end
 
     def commit!
       ensure_repo_exists!
+      return unless changes?
       repo.add(all: true)
       repo.commit_all("CS")
     end
