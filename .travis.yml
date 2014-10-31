@@ -1,0 +1,7 @@
+language: ruby
+cache: bundler
+rvm:
+  - 1.9.3
+install:
+  - git config --global user.email "adam@fake.com"
+  - git config --global user.name "Adam Anderson"
