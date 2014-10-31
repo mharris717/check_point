@@ -23,7 +23,11 @@ module CheckPoint
     end
 
     def changes?
-      return true if !has_commits?
+      if !has_commits?
+        puts "no commits"
+        return true 
+      end
+
       s = repo.status
       s.changed.size > 0 || s.deleted.size > 0 || s.added.size > 0 || s.untracked.size > 0
     end

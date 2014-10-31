@@ -7,6 +7,16 @@ def make_temp_dir
   res
 end
 
+# describe "junk" do
+#   it 'junk' do
+#     1000.times do
+#       dir = make_temp_dir
+#       File.create "#{dir}/a.txt","abc"
+#       File.create "#{dir}/b.txt","xyz"
+#     end
+#   end
+# end
+
 def git_cmd(cmd, ops)
   raise "bad" unless ops[:working_dir] && ops[:repo]
   ec "git --git-dir=#{ops[:repo]} --work-tree=#{root} #{cmd}", silent: true
@@ -25,9 +35,10 @@ class MakeDir
   end
 
   fattr(:repo) do
-    res = "#{root}/.gitcp"
-    ec "mkdir #{res}", silent: true
-    res
+    # res = "#{root}/.gitjunk"
+    # ec "mkdir #{res}", silent: true
+    # res
+    make_temp_dir
   end
 
   def git(cmd)
@@ -54,15 +65,16 @@ shared_context "make dir" do
   end
 
   def assert_status(ops)
+    status = d.git_obj.status
     all = [:changed, :deleted, :added, :untracked]
     other = all - ops.keys
     ops.each do |k,v|
       if k == :other
         other.each do |other_key|
-          d.git_obj.status.send(other_key).size.should == v
+          status.send(other_key).size.should == v
         end
       else
-        d.git_obj.status.send(k).size.should == v
+        status.send(k).size.should == v
       end
     end
   end
@@ -92,6 +104,12 @@ describe "CheckPoint" do
     d.file "a.txt","abc"
     assert_file "a.txt", "abc"
     assert_status changed: 0, deleted: 0
+  end
+
+  it 'getting tree' do
+    tree = d.git_obj.gtree('master')
+    tree.blobs.size.should == 1
+    tree.blobs.values.first.contents.should == 'abc'
   end
 
   it 'make dir' do
@@ -137,5 +155,21 @@ describe "CheckPoint" do
 
     # track.repo.gcommit('master')
     track.repo.diff("master","master^").size.should == 1
+  end
+
+  it 'bin' do
+    bin = "#{CheckPoint.root}/bin/check_point"
+    FileTest.should_not be_exist("#{d.root}/.gitcp")
+    Dir.chdir(d.root) do
+      ec bin
+      FileTest.should be_exist("#{d.root}/.gitcp")
+      track.repo.gtree('master').blobs.size.should == 1
+
+      d.file "b.txt", "def"
+      track.repo.gtree('master').blobs.size.should == 1
+
+      ec bin
+      track.repo.gtree('master').blobs.size.should == 2
+    end
   end
 end
