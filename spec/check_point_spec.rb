@@ -157,19 +157,34 @@ describe "CheckPoint" do
     track.repo.diff("master","master^").size.should == 1
   end
 
-  it 'bin' do
+  def exec_bin(cmd="")
     bin = "#{CheckPoint.root}/bin/check_point"
-    FileTest.should_not be_exist("#{d.root}/.gitcp")
+    res = nil
     Dir.chdir(d.root) do
-      ec bin
-      FileTest.should be_exist("#{d.root}/.gitcp")
-      track.repo.gtree('master').blobs.size.should == 1
-
-      d.file "b.txt", "def"
-      track.repo.gtree('master').blobs.size.should == 1
-
-      ec bin
-      track.repo.gtree('master').blobs.size.should == 2
+      res = ec "#{bin} #{cmd}"
     end
+    res
+  end
+
+  it 'bin' do
+    FileTest.should_not be_exist("#{d.root}/.gitcp")
+    exec_bin
+    FileTest.should be_exist("#{d.root}/.gitcp")
+    track.repo.gtree('master').blobs.size.should == 1
+
+    d.file "b.txt", "def"
+    track.repo.gtree('master').blobs.size.should == 1
+
+    exec_bin
+    track.repo.gtree('master').blobs.size.should == 2
+  end
+
+  it 'bin log' do
+    bin = "#{CheckPoint.root}/bin/check_point"
+    exec_bin
+
+    sha = track.repo.gcommit('master').sha
+    log = exec_bin :log
+    (log =~ /commit #{sha}/).should be
   end
 end
