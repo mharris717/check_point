@@ -28,6 +28,7 @@ class MakeDir
   def initialize(ops={})
     from_hash(ops)
     git_cmd :init, repo: repo, working_dir: root
+    file ".gitignore",".gitcp"
   end
 
   fattr(:root) do
@@ -108,8 +109,8 @@ describe "CheckPoint" do
 
   it 'getting tree' do
     tree = d.git_obj.gtree('master')
-    tree.blobs.size.should == 1
-    tree.blobs.values.first.contents.should == 'abc'
+    tree.blobs.size.should == 2
+    tree.blobs.values.last.contents.should == 'abc'
   end
 
   it 'make dir' do
@@ -170,13 +171,13 @@ describe "CheckPoint" do
     FileTest.should_not be_exist("#{d.root}/.gitcp")
     exec_bin
     FileTest.should be_exist("#{d.root}/.gitcp")
-    track.repo.gtree('master').blobs.size.should == 1
+    track.repo.gtree('master').blobs.size.should == 2
 
     d.file "b.txt", "def"
-    track.repo.gtree('master').blobs.size.should == 1
+    track.repo.gtree('master').blobs.size.should == 2
 
     exec_bin
-    track.repo.gtree('master').blobs.size.should == 2
+    track.repo.gtree('master').blobs.size.should == 3
   end
 
   it 'bin log' do
